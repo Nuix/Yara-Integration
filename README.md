@@ -28,6 +28,10 @@ Open a Nuix case in workbench, select 1 or more items in the reuslts view, then 
 | **Temp Directory** | Determines the location to which the script will temporarily export item binaries for Yara scans. |
 | **Log File** | Location to save a log of scan results. |
 | **Error Log File** | Location to save a log of errors. |
+| **Tag Items with Rule Matches** | Applies a tag denoting matched rules to items. |
+| **Rule Match Root Tag** | When applying tags, this is the root tag to use.  Rule based tags will be nested beneath this one. |
+| **Record Matches as Custom Metadata** | When checked all matching rules will be listed as a semicolon delimited list in a custom metadata field on the item. |
+| **Custom Field Name** | The name of the custom metadata field when applying custom metadata. |
 
 Once configured, click the "Ok" button.  A progress dialog will be displayed as the script exports, scans and report on the Yara scan findings.
 
