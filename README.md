@@ -8,7 +8,7 @@ This script provides integration between [Yara](http://virustotal.github.io/yara
 
 ## Setup
 
-Begin by downloading the latest release.  Extract the folder `AnnotateFromCsv.nuixscript` and its contents from the archive into your Nuix scripts directory.  In windows this directory is likely going to be either of the following:
+Begin by downloading the latest release.  Extract the folder `YaraIntegration.nuixscript` and its contents from the archive into your Nuix scripts directory.  In windows this directory is likely going to be either of the following:
 
 - `%appdata%\Nuix\Scripts` - User level script directory
 - `%programdata%\Nuix\Scripts` - System level script directory
