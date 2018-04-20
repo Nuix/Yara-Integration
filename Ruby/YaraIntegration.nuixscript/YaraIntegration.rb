@@ -98,9 +98,14 @@ main_tab.appendSaveFileChooser("log_file","Log File","Log File","txt")
 main_tab.appendSaveFileChooser("error_log_file","Error Log File","Log File","txt")
 main_tab.setText("log_file",File.join(case_location,"YaraReports","YaraScan_#{file_timestamp}.txt"))
 main_tab.setText("error_log_file",File.join(case_location,"YaraReports","YaraScanErrors_#{file_timestamp}.txt"))
+
 main_tab.appendCheckBox("tag_matches","Tag Items with Rule Matches",true)
 main_tab.appendTextField("match_root_tag","Rule Match Root Tag","Yara")
 main_tab.enabledOnlyWhenChecked("match_root_tag","tag_matches")
+
+main_tab.appendCheckBox("cm_match_list","Record Matches as Custom Metadata",true)
+main_tab.appendTextField("cm_match_field","Custom Field Name","Yara Matches")
+main_tab.enabledOnlyWhenChecked("cm_match_field","cm_match_list")
 
 # Build tab for selecting rules
 rules_tab = dialog.addTab("rules_tab","Yara Rules")
@@ -138,6 +143,17 @@ dialog.validateBeforeClosing do |values|
 		next false
 	end
 
+	# Make sure user provided a custom metadata field name if applying custom metadata
+	if values["cm_match_list"] && values["cm_match_field"].strip.empty?
+		CommonDialogs.showWarning("Please provide a custom metadata field name")
+		next false
+	end
+
+	# Get user confirmation about closing all workbench tabs
+	if CommonDialogs.getConfirmation("The script needs to close all workbench tabs, proceed?") == false
+		next false
+	end
+
 	next true
 end
 
@@ -159,6 +175,12 @@ if dialog.getDialogResult == true
 	include_descendants = resolved_items_choices[values["resolved_items_choice"]][:include_descendants]
 	tag_matches = values["tag_matches"]
 	match_root_tag = values["match_root_tag"]
+	cm_match_list = values["cm_match_list"]
+	cm_match_field = values["cm_match_field"]
+
+	if cm_match_list
+		$window.closeAllTabs
+	end
 
 	# Create instances of the Logger class
 	run_log = Logger.new(log_file)
@@ -168,7 +190,7 @@ if dialog.getDialogResult == true
 	# 2. Export each item
 	# 3. Run yara rules against exported binary
 	# 4. Capture output
-	# 5. Record output as tags
+	# 5. Record output as tags/custom metadata
 	# 6. Record output to report
 
 	# All this will be done with progress dialog displayed
@@ -260,6 +282,7 @@ if dialog.getDialogResult == true
 		#===============#
 		# Export Thread #
 		#===============#
+
 		# Build the thread which is responsible for exporting the binary of each item to be scanned
 		export_thread = Thread.new {
 			# Get API binary exporter
@@ -318,6 +341,7 @@ if dialog.getDialogResult == true
 				while true
 					# Pop next piece of data off the queue
 					data = pending_yara_queue.pop
+
 					# If data is nil, this is the export thread signalling there are actually
 					# no more items to process so we can break from the loop
 					# Also if the user requested to abort from the progress dialog we can break
@@ -366,8 +390,6 @@ if dialog.getDialogResult == true
 					# Push the results over to the annotation thread's queue
 					pending_annotation_queue << data
 					
-					#pd.logMessage("Deleting temporary export binary: #{data[:binary_file]}")
-					
 					java.io.File.new(data[:binary_file]).delete
 					lock.synchronize{ yara_scanned += 1 }
 				end
@@ -406,12 +428,38 @@ if dialog.getDialogResult == true
 				# Take the matched rules and apply them as tags back to the related items
 				matched_rules = data[:matched_rules]
 				item = data[:item]
-				if matched_rules.size > 0 && tag_matches
-					#pd.logMessage("Recording Yara hits on: #{item.getGuid}")
-					matched_rules.each do |matched_rule|
-						item.addTag("Yara|#{matched_rule}")
+				if matched_rules.size > 0
+					annotation_applied = false
+
+					# Are we applying tags?
+					if tag_matches
+						matched_rules.each do |matched_rule|
+							item.addTag("#{match_root_tag}|#{matched_rule}")
+						end
+						annotation_applied = true
 					end
-					lock.synchronize{ annotated += 1 }
+
+					# Are we applying custom metadata?
+					if cm_match_list
+						cm = item.getCustomMetadata
+
+						# Maintain existing results in this field in case someone runs this
+						# script more than once with different rules selected
+						existing_value = cm[cm_match_field]
+						if !existing_value.nil?
+							matched_rules += existing_value.split("; ").reject{|v|v.nil? || v.strip.empty?}
+						end
+
+						# Build delimited field value and record that as custom metadata
+						match_list_value = matched_rules.uniq.sort.join("; ")
+						cm[cm_match_field] = match_list_value
+						annotation_applied = true
+					end
+
+					# Did we end up applying any annotations?
+					if annotation_applied
+						lock.synchronize{ annotated += 1 }
+					end
 				end
 			end
 		}
@@ -430,8 +478,7 @@ if dialog.getDialogResult == true
 				# Periodically update status
 				if (Time.now - last_status_update) > status_update_frequency
 					lock.synchronize{
-						pd.setMainStatus("Exported: #{exported}/#{items.size},"+
-							" Scanned: #{yara_scanned}/#{items.size}, Matched: #{yara_matched}/#{items.size}, Annotated: #{annotated}/#{items.size},"+
+						pd.setMainStatus("Exported: #{exported}/#{items.size}, Scanned: #{yara_scanned}, Matched: #{yara_matched}, Annotated: #{annotated},"+
 							" Yara Errors: #{yara_errors}")
 					}
 					last_status_update = Time.now
@@ -440,8 +487,7 @@ if dialog.getDialogResult == true
 				# Periodically log the status
 				if (Time.now - last_log_update) > status_logged_frequency
 					lock.synchronize{
-						pd.logMessage("Exported: #{exported}/#{items.size},"+
-							" Scanned: #{yara_scanned}/#{items.size}, Matched: #{yara_matched}/#{items.size}, Annotated: #{annotated}/#{items.size},"+
+						pd.logMessage("Exported: #{exported}/#{items.size}, Scanned: #{yara_scanned}, Matched: #{yara_matched}, Annotated: #{annotated},"+
 							" Yara Errors: #{yara_errors}")
 					}
 					last_log_update = Time.now
@@ -468,8 +514,13 @@ if dialog.getDialogResult == true
 			run_log.log("\nCompleted")
 		end
 
-		pd.logMessage("Exported: #{exported}/#{items.size},"+
-			" Scanned: #{yara_scanned}/#{items.size}, Matched: #{yara_matched}/#{items.size}, Annotated: #{annotated}/#{items.size},"+
+		if tag_matches
+			$window.openTab("workbench",{:search=>"tag:\"#{match_root_tag}|*\""})
+		else
+			$window.openTab("workbench",{:search=>""})
+		end
+
+		pd.logMessage("Exported: #{exported}/#{items.size}, Scanned: #{yara_scanned}, Matched: #{yara_matched}, Annotated: #{annotated},"+
 			" Yara Errors: #{yara_errors}")
 
 		run_log.log("\n\nMatched Items: #{yara_matched}/#{items.size}")

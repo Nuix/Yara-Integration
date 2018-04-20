@@ -8,10 +8,10 @@ This script provides integration between [Yara](http://virustotal.github.io/yara
 
 ## Setup
 
-Begin by downloading the latest release.  Extract the folder `YaraIntegration.nuixscript` and its contents from the archive into your Nuix scripts directory.  In windows this directory is likely going to be one either of the following:
+Begin by downloading the latest release.  Extract the folder `YaraIntegration.nuixscript` and its contents from the archive into your Nuix scripts directory.  In windows this directory is likely going to be either of the following:
 
-- `%appdata%\Nuix\Scripts`
-- `%programdata%\Nuix\Scripts`
+- `%appdata%\Nuix\Scripts` - User level script directory
+- `%programdata%\Nuix\Scripts` - System level script directory
 
 Then [download a release of Yara](https://github.com/VirusTotal/yara/releases) and place that in the sub directory named `yara_executable`.
 
@@ -28,6 +28,10 @@ Open a Nuix case in workbench, select 1 or more items in the reuslts view, then 
 | **Temp Directory** | Determines the location to which the script will temporarily export item binaries for Yara scans. |
 | **Log File** | Location to save a log of scan results. |
 | **Error Log File** | Location to save a log of errors. |
+| **Tag Items with Rule Matches** | Applies a tag denoting matched rules to items. |
+| **Rule Match Root Tag** | When applying tags, this is the root tag to use.  Rule based tags will be nested beneath this one. |
+| **Record Matches as Custom Metadata** | When checked all matching rules will be listed as a semicolon delimited list in a custom metadata field on the item. |
+| **Custom Field Name** | The name of the custom metadata field when applying custom metadata. |
 
 Once configured, click the "Ok" button.  A progress dialog will be displayed as the script exports, scans and report on the Yara scan findings.
 
