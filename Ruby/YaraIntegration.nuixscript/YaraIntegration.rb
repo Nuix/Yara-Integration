@@ -302,20 +302,25 @@ if dialog.getDialogResult == true
 				
 				#TODO: At detection of file system stored binary and scan that directly if available
 
-				# Export the item's binary
-				binary_exporter.exportItem(item,export_file)
+				begin
+					# Export the item's binary
+					binary_exporter.exportItem(item,export_file)
 
-				# Record the item and the path it was exported to
-				data = {
-					:item => item,
-					:binary_file => export_file,
-				}
+					# Record the item and the path it was exported to
+					data = {
+						:item => item,
+						:binary_file => export_file,
+					}
 
-				# Add this data to the Yara threads' queue
-				pending_yara_queue << data
+					# Add this data to the Yara threads' queue
+					pending_yara_queue << data
 
-				# Increment count of exported items in a thread safe way
-				lock.synchronize{ exported += 1 }
+					# Increment count of exported items in a thread safe way
+					lock.synchronize{ exported += 1 }
+				rescue Exception => exc
+					error_log.log("Error while exporting item with GUID #{guid}: #{exc.message}")
+					error_log.log(exc.backtrace.join("\n"))
+				end
 			end
 
 			# Once the above while loop exits, we will signal the Yara threads that things have
@@ -358,6 +363,8 @@ if dialog.getDialogResult == true
 					matched_rules = output[:stdout].map{|l|l.split(" ")[0]}
 					data[:matched_rules] = matched_rules
 
+					item_binary_file = java.io.File.new(data[:binary_file])
+
 					# If we got hits or errors, we will first generate a blurb with some
 					# info about this item, then record our findings leading with this blurb
 					if output[:stdout].size > 0 || output[:stderr].size > 0
@@ -368,6 +375,13 @@ if dialog.getDialogResult == true
 						item_info << "Mime Type: #{item.getType.getName}\n"
 						item_info << "MD5: #{item.getDigests.getMd5 || "N/A"}\n"
 						item_info << "Audited Size: #{item.getAuditedSize}\n"
+						item_info << "Exported Binary File Location: #{data[:binary_file]}\n"
+						begin
+							item_info << "File Exists: #{item_binary_file.exists}\n"
+							item_info << "File Size: #{item_binary_file.length}\n"
+						rescue Exception => file_exc
+							item_info << "Error getting information about exported file: #{file_exc.message}\n"
+						end
 						item_info << "#{matched_rules.size} Matched Rules:\n"
 
 						# If running Yara yielded matches, record information about the item
@@ -390,7 +404,7 @@ if dialog.getDialogResult == true
 					# Push the results over to the annotation thread's queue
 					pending_annotation_queue << data
 					
-					java.io.File.new(data[:binary_file]).delete
+					item_binary_file.delete
 					lock.synchronize{ yara_scanned += 1 }
 				end
 				# Signals that was the last one because data should be nil at this point
