@@ -40,6 +40,14 @@ Open a Nuix case in workbench, select 1 or more items in the reuslts view, then 
 
 Once configured, click the "Ok" button.  A progress dialog will be displayed as the script exports, scans and report on the Yara scan findings.
 
+## Cloning this Repository
+
+This script relies on code from [Nx](https://github.com/Nuix/Nx) to present a settings dialog and progress dialog.  This JAR file is not included in the repository (although it is included in release downloads).  If you clone this repository, you will also want to obtain a copy of Nx.jar by either:
+1. Building it from [the source](https://github.com/Nuix/Nx)
+2. Downloading an already built JAR file from the [Nx releases](https://github.com/Nuix/Nx/releases)
+
+Once you have a copy of Nx.jar, make sure to include it in the same directory as the script.
+
 # License
 
 ```
