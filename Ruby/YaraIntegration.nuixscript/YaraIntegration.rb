@@ -318,7 +318,11 @@ if dialog.getDialogResult == true
 					# Increment count of exported items in a thread safe way
 					lock.synchronize{ exported += 1 }
 				rescue Exception => exc
-					error_log.log("Error while exporting item with GUID #{guid}: #{exc.message}")
+					error_message = "Error while exporting item with GUID #{guid}: #{exc.message}"
+					# Show we had an error in the progress dialog
+					pd.logMessage(error_message)
+					# Record the error to the log as well
+					error_log.log(error_message)
 					error_log.log(exc.backtrace.join("\n"))
 				end
 			end
