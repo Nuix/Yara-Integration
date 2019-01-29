@@ -1,0 +1,1 @@
+Place Yara executable in this directory

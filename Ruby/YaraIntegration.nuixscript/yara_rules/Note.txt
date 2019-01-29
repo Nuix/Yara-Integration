@@ -1,0 +1,4 @@
+Place Yara rules in this directory
+
+There is another GitHub repository which may be a good starting point
+https://github.com/Yara-Rules/rules
