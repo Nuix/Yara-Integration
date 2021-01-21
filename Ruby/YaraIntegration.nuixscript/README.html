@@ -1,0 +1,108 @@
+<doctype html>
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
+<style>
+	.markdown-body {
+		box-sizing: border-box;
+		min-width: 200px;
+		max-width: 980px;
+		margin: 0 auto;
+		padding: 45px;
+	}
+
+	@media (max-width: 767px) {
+		.markdown-body {
+			padding: 15px;
+		}
+	}
+</style>
+</head>
+<body class="markdown-body">
+<h1>Yara Integration</h1>
+<p><img src="https://img.shields.io/badge/Script%20Tested%20in%20Nuix-9.0-green.svg" alt="This script was last tested in Nuix 9.0" /></p>
+<p>View the GitHub project <a href="https://github.com/Nuix/Yara-Integration">here</a> or download the latest release <a href="https://github.com/Nuix/Yara-Integration/releases">here</a>.</p>
+<h1>Overview</h1>
+<p>This script provides integration between <a href="http://virustotal.github.io/yara/">Yara</a> and <a href="https://www.nuix.com/">Nuix</a> workbench.  The script allows the user to make a selection of Nuix items in a case, a selection of Yara rules and then run those rules against those items.  Rule matches are recorded as tags on the items in the case as well as in a log file.</p>
+<h1>Getting Started</h1>
+<h2>Setup</h2>
+<p>Begin by downloading the latest release.  Extract the folder <code>YaraIntegration.nuixscript</code> and its contents from the archive into your Nuix scripts directory.  In windows this directory is likely going to be either of the following:</p>
+<ul>
+<li><code>%appdata%\Nuix\Scripts</code> - User level script directory</li>
+<li><code>%programdata%\Nuix\Scripts</code> - System level script directory</li>
+</ul>
+<p>Then <a href="https://github.com/VirusTotal/yara/releases">download a 64-bit release of Yara</a> and place that in the sub directory named <code>yara_executable</code>.</p>
+<p>Then place 1 or more Yara rule <code>.yar</code> files into the sub directory named <code>yara_rules</code>.</p>
+<h2>Running the Script</h2>
+<p>Open a Nuix case in workbench, select 1 or more items in the reuslts view, then run the script from the &quot;Scripts&quot; menu.  The script will display a settings dialog with the following settings:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Yara Rules</strong></td>
+<td>Select 1 or more Yara rules to be ran against the selected items.</td>
+</tr>
+<tr>
+<td><strong>Concurrent Yara Processes</strong></td>
+<td>Determines how many Yara scans the script will attempt to execute concurrently.</td>
+</tr>
+<tr>
+<td><strong>Temp Directory</strong></td>
+<td>Determines the location to which the script will temporarily export item binaries for Yara scans.</td>
+</tr>
+<tr>
+<td><strong>Log File</strong></td>
+<td>Location to save a log of scan results.</td>
+</tr>
+<tr>
+<td><strong>Error Log File</strong></td>
+<td>Location to save a log of errors.</td>
+</tr>
+<tr>
+<td><strong>Tag Items with Rule Matches</strong></td>
+<td>Applies a tag denoting matched rules to items.</td>
+</tr>
+<tr>
+<td><strong>Rule Match Root Tag</strong></td>
+<td>When applying tags, this is the root tag to use.  Rule based tags will be nested beneath this one.</td>
+</tr>
+<tr>
+<td><strong>Record Matches as Custom Metadata</strong></td>
+<td>When checked all matching rules will be listed as a semicolon delimited list in a custom metadata field on the item.</td>
+</tr>
+<tr>
+<td><strong>Custom Field Name</strong></td>
+<td>The name of the custom metadata field when applying custom metadata.</td>
+</tr>
+</tbody>
+</table>
+<p>Once configured, click the &quot;Ok&quot; button.  A progress dialog will be displayed as the script exports, scans and report on the Yara scan findings.</p>
+<h2>Cloning this Repository</h2>
+<p>This script relies on code from <a href="https://github.com/Nuix/Nx">Nx</a> to present a settings dialog and progress dialog.  This JAR file is not included in the repository (although it is included in release downloads).  If you clone this repository, you will also want to obtain a copy of Nx.jar by either:</p>
+<ol>
+<li>Building it from <a href="https://github.com/Nuix/Nx">the source</a></li>
+<li>Downloading an already built JAR file from the <a href="https://github.com/Nuix/Nx/releases">Nx releases</a></li>
+</ol>
+<p>Once you have a copy of Nx.jar, make sure to include it in the same directory as the script.</p>
+<h1>License</h1>
+<pre><code>Copyright 2021 Nuix
+
+Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</code></pre>
+</body>
+</html>

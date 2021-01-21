@@ -86,6 +86,7 @@ end
 # Build the settings dialogs #
 #============================#
 dialog = TabbedCustomDialog.new("Yara Integration")
+dialog.setHelpFile(File.join(script_directory,"README.html"))
 
 main_tab = dialog.addTab("main_tab","Main")
 main_tab.appendHeader("Selected Items: #{$current_selected_items.size}")
