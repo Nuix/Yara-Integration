@@ -18,7 +18,7 @@ Begin by downloading the latest release.  Extract the folder `YaraIntegration.nu
 - `%appdata%\Nuix\Scripts` - User level script directory
 - `%programdata%\Nuix\Scripts` - System level script directory
 
-Then [download a release of Yara](https://github.com/VirusTotal/yara/releases) and place that in the sub directory named `yara_executable`.
+Then [download a 64-bit release of Yara](https://github.com/VirusTotal/yara/releases) and place that in the sub directory named `yara_executable`.
 
 Then place 1 or more Yara rule `.yar` files into the sub directory named `yara_rules`.
 

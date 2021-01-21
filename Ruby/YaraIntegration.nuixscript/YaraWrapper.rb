@@ -70,7 +70,8 @@ class YaraWrapper
 	# the binary at the specified file path
 	def run_rules(input_file)
 		command = "#{@base_command} \"#{input_file}\""
-		output = Helpers.run_command(command,true,File.dirname(@rule_directory))
+		#output = Helpers.run_command(command,true,File.dirname(@rule_directory))
+		output = Helpers.run_command(command,true,@rule_directory)
 		return output
 	end
 end

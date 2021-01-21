@@ -37,7 +37,7 @@ load File.join(script_directory,"Helpers.rb")
 load File.join(script_directory,"YaraWrapper.rb")
 
 # Define directory containing yara rules and executable
-yara_exe_path = File.join(script_directory,"yara_executable","yara.exe").gsub("/","\\\\")
+yara_exe_path = File.join(script_directory,"yara_executable","yara64.exe").gsub("/","\\\\")
 yara_rule_directory = File.join(script_directory,"yara_rules").gsub("/","\\\\")
 
 # Make sure yara exe exists
